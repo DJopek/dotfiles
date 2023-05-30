@@ -8,3 +8,6 @@ I use iTerm2 on macOS with synth wave colour scheme which you can find in `color
 - [Homebrew](https://brew.sh/)
 - [iTerm2](https://iterm2.com/)
 - [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting/tree/master)
+
+## Preview
+<img src="/preview.png">

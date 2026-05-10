@@ -343,6 +343,9 @@ require('lazy').setup({
     end,
   },
 
+  -- Autopairs (auto-close brackets, quotes, etc.)
+  { 'echasnovski/mini.pairs', event = 'InsertEnter', opts = {} },
+
   -- Package manager for LSP servers / linters / formatters
   { 'mason-org/mason.nvim', config = true },
   {

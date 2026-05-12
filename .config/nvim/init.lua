@@ -41,6 +41,7 @@ opt.undofile         = true
 vim.g.mapleader      = ','
 vim.g.maplocalleader = ','
 
+
 -------------------------------------------------------------------------------
 -- Palette (VS Code "Synth Wave '84 Luis Reyes Remix" theme; bg forced to iTerm)
 -------------------------------------------------------------------------------
@@ -301,6 +302,8 @@ vim.cmd[[
   hi link markdownCode     String
   hi link markdownLinkText Underlined
 ]]
+hi('@markup.math',         { fg = c.orange })
+hi('@markup.math.latex',   { fg = c.orange })
 
 -- Netrw (built-in browser) — matches zsh ls colors
 hi('netrwDir',     { fg = c.purple, bold = true })   -- dirs in zsh-magenta
@@ -327,18 +330,16 @@ vim.opt.rtp:prepend(lazypath)
 require('lazy').setup({
   {
     'nvim-treesitter/nvim-treesitter',
-    tag = 'v0.9.3',  -- last release with the legacy `.configs.setup()` API
+    branch = 'main',
+    lazy = false,
     build = ':TSUpdate',
     config = function()
-      require('nvim-treesitter.configs').setup({
-        ensure_installed = {
-          'python', 'lua', 'vim', 'vimdoc', 'bash', 'json', 'yaml',
-          'toml', 'markdown', 'markdown_inline', 'html', 'css',
-          'javascript', 'typescript', 'tsx', 'matlab', 'comment',
-        },
-        auto_install = true,
-        highlight = { enable = true },
-        indent    = { enable = true },
+      require('nvim-treesitter').setup()
+      require('nvim-treesitter').install({
+        'python', 'lua', 'vim', 'vimdoc', 'bash', 'json', 'yaml',
+        'toml', 'markdown', 'markdown_inline', 'html', 'css',
+        'javascript', 'typescript', 'tsx', 'matlab', 'comment', 'latex',
+        'c', 'cpp', 'gitcommit', 'git_rebase',
       })
     end,
   },
@@ -352,7 +353,7 @@ require('lazy').setup({
     'mason-org/mason-lspconfig.nvim',
     dependencies = { 'mason-org/mason.nvim', 'neovim/nvim-lspconfig' },
     opts = {
-      ensure_installed = { 'pyright', 'ruff', 'lua_ls', 'matlab_ls' },
+      ensure_installed = { 'pyright', 'ruff', 'lua_ls', 'matlab_ls', 'marksman', 'clangd' },
       automatic_installation = true,
     },
   },
@@ -381,6 +382,12 @@ require('lazy').setup({
         },
       })
 
+      -- C/C++
+      vim.lsp.config('clangd', {})
+
+      -- Markdown
+      vim.lsp.config('marksman', {})
+
       -- MATLAB
       vim.lsp.config('matlab_ls', {
         settings = {
@@ -393,7 +400,7 @@ require('lazy').setup({
         },
       })
 
-      vim.lsp.enable({ 'pyright', 'ruff', 'lua_ls', 'matlab_ls' })
+      vim.lsp.enable({ 'pyright', 'ruff', 'lua_ls', 'matlab_ls', 'marksman', 'clangd' })
 
       -- Disable pyright's semantic tokens: they tag every builtin (range, int,
       -- float, type, ...) as "class + defaultLibrary", which collapses the
@@ -418,6 +425,15 @@ require('lazy').setup({
       })
     end,
   },
+})
+
+-------------------------------------------------------------------------------
+-- Treesitter highlighting (nvim 0.12+ built-in, queries from nvim-treesitter)
+-------------------------------------------------------------------------------
+vim.api.nvim_create_autocmd('FileType', {
+  callback = function()
+    pcall(vim.treesitter.start)
+  end,
 })
 
 -------------------------------------------------------------------------------

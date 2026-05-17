@@ -39,3 +39,10 @@
 ((call
    function: (identifier) @function.builtin)
   (#any-of? @function.builtin "range"))
+
+; String prefix (f", r", b", rb", etc.) — highlight distinctly from content.
+(string
+  (string_start) @string.delimiter)
+
+(string
+  (string_end) @string.delimiter)

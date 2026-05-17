@@ -257,6 +257,45 @@ vim.api.nvim_create_autocmd({ 'BufWinEnter', 'FileType' }, {
   end,
 })
 
+-- $...$ delimiters only inside r-strings (LaTeX math)
+local latex_ns = vim.api.nvim_create_namespace('python_latex_delim')
+local function highlight_rstring_dollars(buf)
+  vim.api.nvim_buf_clear_namespace(buf, latex_ns, 0, -1)
+  local parser = vim.treesitter.get_parser(buf, 'python')
+  if not parser then return end
+  local tree = parser:parse()[1]
+  if not tree then return end
+  local query = vim.treesitter.query.parse('python', '(string (string_start) @prefix (string_content) @content)')
+  for _, match in query:iter_matches(tree:root(), buf) do
+    local prefix_node = match[1][1]
+    local content_node = match[2][1]
+    if not prefix_node or not content_node then goto continue end
+    local prefix_text = vim.treesitter.get_node_text(prefix_node, buf)
+    if prefix_text:match('^r') or prefix_text:match('^[bB]r') or prefix_text:match('^[rR][bB]') then
+      local sr, sc, er, ec = content_node:range()
+      local lines = vim.api.nvim_buf_get_text(buf, sr, sc, er, ec, {})
+      for i, line in ipairs(lines) do
+        local row = sr + i - 1
+        local col_offset = (i == 1) and sc or 0
+        for pos in line:gmatch('()%$') do
+          local col = col_offset + pos - 1
+          vim.api.nvim_buf_set_extmark(buf, latex_ns, row, col, {
+            end_col = col + 1,
+            hl_group = 'PythonLatexDelimiter',
+          })
+        end
+      end
+    end
+    ::continue::
+  end
+end
+vim.api.nvim_create_autocmd({ 'FileType', 'TextChanged', 'TextChangedI', 'BufEnter' }, {
+  pattern = 'python',
+  callback = function(ev)
+    highlight_rstring_dollars(ev.buf)
+  end,
+})
+
 -- LSP semantic tokens — link to the matching tree-sitter groups so pyright
 -- et al. don't flatten the carefully-tuned highlights above.
 vim.cmd[[
@@ -305,6 +344,10 @@ vim.cmd[[
 hi('@markup.math',         { fg = c.orange })
 hi('@markup.math.latex',   { fg = c.orange })
 
+-- Python string delimiters (f", r", b", quotes) — distinct from string content
+hi('@string.delimiter',    { fg = c.yellow })
+hi('PythonLatexDelimiter', { fg = c.red, bold = true })
+
 -- Netrw (built-in browser) — matches zsh ls colors
 hi('netrwDir',     { fg = c.purple, bold = true })   -- dirs in zsh-magenta
 hi('netrwExe',     { fg = c.yellow, bold = true })   -- executables yellow
@@ -343,6 +386,8 @@ require('lazy').setup({
       })
     end,
   },
+
+  { 'tpope/vim-fugitive' },
 
   -- Autopairs (auto-close brackets, quotes, etc.)
   { 'echasnovski/mini.pairs', event = 'InsertEnter', opts = {} },

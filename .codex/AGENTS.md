@@ -1,0 +1,4 @@
+- Discussion first, no action or implementation unless asked to.
+- Precise, professional, technically accurate communication.
+- Structural arguments with rigorous and deductive reasoning preferred.
+- No unnecessary verbosity, hedging, or filler.

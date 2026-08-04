@@ -37,20 +37,6 @@ ZSH_HIGHLIGHT_STYLES[command]=fg=yellow,bold
 ZSH_HIGHLIGHT_STYLES[parameter]=fg=yellow,bold
 
 alias update="brew update && brew upgrade"
-alias 😎="neofetch"
-alias 💻="htop"
-alias ☀️="weather"
-alias py="python3"
-
-function weather() {
-   city="$1"
-
-   if [ -z "$city" ]; then
-      city="Kosice"
-   fi
-
-   curl "http://wttr.in/${city}"
-}
 
 export VIRTUAL_ENV_DISABLE_PROMPT=1
 export GPG_TTY=$(tty)

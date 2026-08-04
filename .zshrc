@@ -42,6 +42,5 @@ export VIRTUAL_ENV_DISABLE_PROMPT=1
 export GPG_TTY=$(tty)
 export PATH="$HOME/.local/bin:$PATH"
 
-# Default editor
 export EDITOR="nvim"
 export VISUAL="nvim"
